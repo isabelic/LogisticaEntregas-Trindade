@@ -1,7 +1,7 @@
 package org.example.dao;
 
 import java.sql.Connection;
-import org.example.Conexao;
+
 import org.example.model.Cliente;
 
 import java.sql.PreparedStatement;
@@ -58,7 +58,50 @@ public class ClienteDao {
        // return lista;
     }
 
+    public void relatorioVolumeMaior(){
+        String query = """
+                SELECT c.nome, SUM(p.volume_m3) AS totalVolume
+                FROM Cliente c
+                JOIN Pedido p ON c.id = p.cliente_id
+                JOIN Entrega e ON e.pedido_id = p.id
+                WHERE e.status = 'ENTREGUE'
+                GROUP BY c.nome
+                ORDER BY totalVolume  DESC
+               """;
+
+        try (Connection conn = Conexao.conectar();
+        PreparedStatement st = conn.prepareStatement(query);
+        ResultSet rt = st.executeQuery()){
+
+            while(rt.next()){
+                System.out.println("Cliente: " +  rt.getString("nome")+
+                        " | Entrega: " + rt.getString("totalVolume"));
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
 
 
+ public void excluir(int id){
+    String query = "DELETE FROM Cliente WHERE id = ? AND NOT EXISTS ( SELECT id FROM Pedido WHERE Pedido.cliente_id = Cliente.id) ";
 
+    try (Connection conn = Conexao.conectar();
+    PreparedStatement st = conn.prepareStatement(query)){
+
+        st.setInt(1,id);
+        int validar = st.executeUpdate();
+
+
+        if(validar > 0 ){
+            System.out.println("Cliente excluido com sucesso!");
+        } else{
+            System.out.println("Não foi possivel excluir esse cliente!");
+        }
+
+
+    }catch (SQLException e){
+        e.printStackTrace();
+
+    }}
 }

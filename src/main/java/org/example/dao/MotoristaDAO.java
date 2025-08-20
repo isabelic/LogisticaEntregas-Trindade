@@ -2,7 +2,6 @@ package org.example.dao;
 
 
 import java.sql.Connection;
-import org.example.Conexao;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
