@@ -46,7 +46,7 @@ public class Main {
                 case 15 -> {
                     System.out.print("ID Cliente: ");
                     int ID = sc.nextInt();
-                    cdao.excluir(ID);
+                    cdao.excluirCascata(ID);
                 }
             }
 

@@ -3,12 +3,15 @@ package org.example.dao;
 import java.sql.Connection;
 
 import org.example.model.Cliente;
+import org.example.model.Pedido;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 public class ClienteDao {
 
@@ -83,7 +86,7 @@ public class ClienteDao {
     }
 
 
- public void excluir(int id){
+/* public void excluir(int id){
     String query = "DELETE FROM Cliente WHERE id = ? AND NOT EXISTS ( SELECT id FROM Pedido WHERE Pedido.cliente_id = Cliente.id) ";
 
     try (Connection conn = Conexao.conectar();
@@ -103,5 +106,66 @@ public class ClienteDao {
     }catch (SQLException e){
         e.printStackTrace();
 
-    }}
+    }}*/
+
+
+
+    public void excluirCascata(int id){
+        // variavel para pedidos existentes
+
+        String queryPedidos = "SELECT id, data_pedido, status FROM Pedido WHERE cliente_id = ?";
+        String queryExcluirPedidos = "DELETE FROM Pedido WHERE cliente_id = ?";
+
+        String queryExcluirCliente = "DELETE FROM Cliente WHERE id = ?";
+
+
+        try (Connection conn = Conexao.conectar()){
+        try(PreparedStatement st = conn.prepareStatement(queryPedidos)){
+
+            st.setInt(1,id);
+            ResultSet rt = st.executeQuery();
+
+
+            boolean pedidos = false;
+            System.out.println("Pedidos relacionados a esse cliente: ");
+            while(rt.next()){
+                pedidos = true;
+                int idP = rt.getInt("id");
+                Date dataPedido = rt.getDate("data_pedido");
+                String status = rt.getString("status");
+                System.out.println("ID: " + idP + ", Valor: " + dataPedido + ", Data: " + status);
+            }
+
+            if(pedidos){
+                Scanner sc = new Scanner(System.in);
+
+                System.out.println("Antes de excluir o cliente, os pedidos vinculados precisam ser removidos.\n--> Deseja excluir os pedidos do cliente? (s/n): ");
+                String resp = sc.next();
+
+                if(!resp.equalsIgnoreCase("s")){
+                    System.out.println("Falha ao tentar excluir");
+                    return;
+                }
+
+
+                try(PreparedStatement stPedido = conn.prepareStatement(queryExcluirPedidos)){
+                    stPedido.setInt(1,id);
+                    stPedido.executeUpdate();
+
+                    System.out.println("Pedidos excluidos!");
+                }
+            }
+        }
+
+                    try(PreparedStatement stCliente = conn.prepareStatement(queryExcluirCliente)){
+                        stCliente.setInt(1,id);
+                        stCliente.executeUpdate();
+                        System.out.println("Cliente excluido");
+                    }
+        }  catch (SQLException e){
+            e.printStackTrace();
+        }
+
+
+    }
 }
