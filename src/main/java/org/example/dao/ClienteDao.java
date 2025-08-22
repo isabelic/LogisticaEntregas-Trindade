@@ -15,15 +15,17 @@ import java.util.Scanner;
 
 public class ClienteDao {
 
-    public void inserir(int id,String nome, String estado){
-        String query = "INSERT INTO cliente (id, nome, estado) VALUES(?,?,?)";
+    public void inserir(int id,int cpfCnpj,String nome, String estado){
+        String query = "INSERT INTO Cliente (id, cpf_cnpj, nome, estado) VALUES(?,?,?,?)";
 
         try (Connection conn = Conexao.conectar();
              PreparedStatement st = conn.prepareStatement(query)){
 
             st.setInt(1,id);
-            st.setString(2, nome);
-            st.setString(3,estado);
+            st.setInt(2, cpfCnpj);
+            st.setString(3, nome);
+            st.setString(4,estado);
+
             st.executeUpdate();
 
             System.out.println("Cliente cadastrado com sucesso!");
@@ -166,6 +168,45 @@ public class ClienteDao {
             e.printStackTrace();
         }
 
+    }
 
+    public void listarClientesComPedidos() {
+        String sql = """
+        SELECT c.id AS id, c.nome AS cliente_nome, 
+               p.id AS id
+        FROM Cliente c
+        LEFT JOIN Pedido p ON c.id = p.cliente_id
+        ORDER BY c.id;
+        """;
+
+        try (Connection conn = Conexao.conectar();
+             PreparedStatement st = conn.prepareStatement(sql);
+             ResultSet rs = st.executeQuery()) {
+
+            int limparListar = -1;
+
+
+            while (rs.next()) {
+                int clienteId = rs.getInt("id");
+                String clienteNome = rs.getString("cliente_nome");
+                int pedidoId = rs.getInt("id");
+
+
+                // Só imprime o cliente uma vez
+                if (clienteId != limparListar) {
+                    System.out.println("\nCliente: " + clienteNome + " (ID: " + clienteId + ")");
+                    limparListar = clienteId;
+                }
+
+                if (pedidoId > 0) {
+                    System.out.println("   Pedido: " + pedidoId);
+                } else {
+                    System.out.println("   Nenhum pedido associado.");
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -10,20 +10,18 @@ import java.time.LocalDate;
 
 public class PedidoDAO {
 
-    public void inserir(int id, int clienteID, LocalDate dataPedido,double volume, double peso, String status){
-        String query = "INSERT INTO Pedido (id,cliente_id, data_pedido, volume_m3, peso_kg, status) VALUES (?,?,?,?,?,?)";
+    public void inserir( int clienteID, LocalDate dataPedido,double volume, double peso){
+        String query = "INSERT INTO Pedido (cliente_id, data_pedido, volume_m3, peso_kg) VALUES (?,?,?,?)";
 
 
         try(Connection conn = Conexao.conectar();
             PreparedStatement st = conn.prepareStatement(query)){
 
+            st.setObject(1, clienteID);
+            st.setObject(2, dataPedido);
+            st.setDouble(3, volume);
+            st.setDouble(4, peso);
 
-            st.setInt(1, id);
-            st.setInt(2, clienteID);
-            st.setObject(3, dataPedido);
-            st.setDouble(4, volume);
-            st.setDouble(5, peso);
-            st.setString(6, status);
             st.executeUpdate();
 
             System.out.println("Pedido criado com sucesso!");

@@ -9,15 +9,15 @@ import java.time.LocalDate;
 
 public class EntregaDAO {
 
-    public void inserir(int id, int pedidoID, int motoristaID, String status){
-        String query = "INSERT INTO Entrega (id,pedido_id, motorista_id,status) VALUES (?,?,?,?)";
+    public void inserir(int pedidoID, int motoristaID, String status){
+        String query = "INSERT INTO Entrega (pedido_id, motorista_id,status) VALUES (?,?,?)";
 
         try(Connection conn = Conexao.conectar();
             PreparedStatement st = conn.prepareStatement(query)){
-            st.setInt(1, id);
-            st.setInt(2, pedidoID);
-            st.setInt(3, motoristaID);;
-            st.setString(4, status);
+
+            st.setInt(1, pedidoID);
+            st.setInt(2, motoristaID);;
+            st.setString(3, status);
             st.executeUpdate();
 
             System.out.println(" Entrega criada com sucesso!");
