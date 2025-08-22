@@ -9,13 +9,13 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        /*try(Connection conn = Conexao.conectar()){
+        /*try (Connection conn = Conexao.conectar()){
             if(conn != null){
-                System.out.println("deu certo ");
-            } else{
-                System.out.println("nao deu ");
+                System.out.println("deu certi");
+            }else {
+                System.out.println("nao due");
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }*/
         Scanner sc = new Scanner(System.in);
@@ -122,11 +122,13 @@ public class Main {
                 case 9 -> cdao.relatorioVolumeMaior();
                 case 10 -> pdao.relatorioPedidosPendentes();
                 case 11 -> edao.relatorioEntregasAtrasadas();
-                /*case 12 -> {
+
+                case 12 -> {
                     System.out.print("CPF/CNPJ Cliente: ");
                     int cpf = sc.nextInt();
-                    pdao.relorioBuscarCpfCnpj(cpf);
-                }*/
+                    sc.nextLine();
+                    pdao.relorioBuscarCpfCnpj();
+                }
                 case 13 -> {
                     System.out.print("ID Pedido: ");
                     int pid = sc.nextInt();
@@ -147,9 +149,24 @@ public class Main {
                     int mid = sc.nextInt();
                     mdao.excluirCascata(mid);
                 }
+
+                case 17 -> {
+                    System.out.print("ID do Pedido: ");
+                    int pid2 = sc.nextInt();
+                    sc.nextLine(); // consumir quebra de linha
+
+                    System.out.print("Status da entrega (PENDENTE/ENVIADO/ENTREGUE): ");
+                    String status1 = sc.nextLine();
+
+                    edao.criarEntrega(pid2, status1);
+
+                }
+
                 case 0 -> System.out.println("Saindo...");
                 default -> System.out.println("Opção inválida!");
             }
+
+
 
         } while (opcao != 0);
 

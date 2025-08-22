@@ -28,7 +28,7 @@ public class EntregaDAO {
 
 
     public void atualizarStatus(int id, String statusAtualizado, LocalDate dataEntrega){
-        String query = "UPDATE Entrega set status = ?, data_entrega = ?, WHERE id = ?";
+        String query = "UPDATE Entrega SET status = 'ENTREGUE' WHERE id = 3;";
 
         try(Connection conn = Conexao.conectar();
         PreparedStatement st = conn.prepareStatement(query)){
@@ -44,32 +44,30 @@ public class EntregaDAO {
     }
 
 
-    public void ListarMC (){
+    public void ListarMC() {
         String query = """
-            SELECT e.id, c.nome AS Cliente, m.nome AS Motorista, e.status
-            FROM Entrega e 
-            JOIN Pedido p ON e.pedido_id = p.id
-            JOIN Cliente c ON p.cliente_id = c.id
-            JOIN Motorista m ON e.motorista_id = m.id
-        """;
+        SELECT e.id, c.nome AS cliente, m.nome AS motorista, e.status
+        FROM Entrega e
+        LEFT JOIN Motorista m ON e.motorista_id = m.id
+        LEFT JOIN Cliente c ON e.cliente_id = c.id;
+    """;
 
         try (Connection conn = Conexao.conectar();
-        PreparedStatement st = conn.prepareStatement(query);
+             PreparedStatement st = conn.prepareStatement(query);
+             ResultSet rt = st.executeQuery()) {
 
-            ResultSet rt = st.executeQuery()){
-             while(rt.next()){
+            while(rt.next()){
+                System.out.println("Entrega " + rt.getInt("id") +
+                        " | Cliente: " + rt.getString("cliente") +
+                        " | Motorista: " + rt.getString("motorista") +
+                        " | Status: " + rt.getString("status"));
+            }
 
-                 System.out.println("Entrega " + rt.getInt("id")+
-                         " | Cliente: " + rt.getString("cliente")+
-                         " | Motorista: " + rt.getString("motorista")+
-                         " | Status: "+ rt.getString("status"));
-             }
-
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
+
 
     public void relatorioEntrega(){
         String query = """
@@ -94,11 +92,13 @@ public class EntregaDAO {
         }
     }
 
+
     public void relatorioEntregasAtrasadas(){
         String query = """
                 SELECT c.cidade, COUNT(e.id) AS atrasadas
                 FROM Entrega e
                 JOIN  Pedido p ON  e.pedido_id =  p.id
+                JOIN Cliente c ON  p.id = c.id
                 WHERE e.status = 'ATRASADA'
                 GROUP BY c.cidade
                 """;
@@ -107,7 +107,7 @@ public class EntregaDAO {
             PreparedStatement st = conn.prepareStatement(query);
             ResultSet rt  = st.executeQuery()){
             while (rt.next()){
-                System.out.println("Cliente: " + rt.getString("nome")+
+                System.out.println("Cliente: " + rt.getString("cidade")+
                         " | Entregas atrasasdas: " + rt.getString("atrasadas"));
             }
         }catch (SQLException e){
@@ -115,6 +115,27 @@ public class EntregaDAO {
         }
     }
 
+    public void criarEntrega(int id, String status) {
+        String query = "INSERT INTO Entrega (pedido_id, status) VALUES (?, ?)";
+
+        try (Connection conn = Conexao.conectar();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            // Preenche os parâmetros do PreparedStatement
+            stmt.setInt(1, id);
+            stmt.setString(2, status);
+
+
+            int linhas = stmt.executeUpdate();
+
+            if (linhas > 0) {
+                System.out.println("Entrega criada com sucesso!");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao criar entrega: " + e.getMessage());
+        }
+    }
 
     public void excluir(int entregaID){
         // query para validacao
